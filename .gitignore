@@ -1,0 +1,11 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.a
+*.elf
+
+# Generated files
+vectors.s
+ldscript.ld.gen
