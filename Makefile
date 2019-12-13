@@ -13,9 +13,9 @@ USE_SEMIHOSTING = 0
 
 ##############################################################################
 
-CPUFLAGS += -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -mfpu=vfp
-FLAGS += -ISTM32CubeF1/Drivers/CMSIS/Core/Include
-FLAGS += -ISTM32CubeF1/Drivers/CMSIS/Device/ST/STM32F1xx/Include
+CPUFLAGS += -mcpu=cortex-m4 -mfloat-abi=hard
+FLAGS += -ISTM32CubeF4/Drivers/CMSIS/Core/Include
+FLAGS += -ISTM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include
 
 FLAGS += $(CPUFLAGS) $(DEFINES)
 FLAGS += -Wall -Werror
@@ -29,7 +29,7 @@ CXXFLAGS = $(CFLAGS)
 LDSCRIPT = ldscript.ld
 LDFLAGS += $(CPUFLAGS)
 
-VECTORTYPE = stm32f1
+VECTORTYPE = stm32f401
 
 LDFLAGS += --specs=nano.specs
 

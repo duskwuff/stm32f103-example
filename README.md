@@ -1,6 +1,6 @@
-# stm32f103-example
+# stm32f401-example
 
-A tiny example project for the STM32F103.
+A tiny example project for the STM32F401.
 
 
 ## Requirements
@@ -9,18 +9,18 @@ A tiny example project for the STM32F103.
 * [OpenOCD](http://openocd.org/)
 * [Perl](https://www.perl.org/)
 
-* A STM32F103C8 "Blue Pill" or compatible board
+* A STM32F401CC "Black Pill" or compatible board
 * A ST-Link debug adapter (or a compatible clone)
 
 
 ## Building and debugging
 
-(Before you start: Make sure you have checked out the `STM32CubeF1` submodule. You can do this by running `git submodule update --init`.)
+(Before you start: Make sure you have checked out the `STM32CubeF4` submodule. You can do this by running `git submodule update --init`.)
 
-Set both BOOT jumpers to 0, attach your debugger to the computer and the target, then start OpenOCD:
+Attach your debugger to the computer and the target, then start OpenOCD:
 
 ```
-openocd -f stlink-f1.cfg
+openocd -f stlink-f4.cfg
 ```
 
 Leave this running in one terminal, then launch:
@@ -36,7 +36,7 @@ You can now use `make` and `run` to run the program.
 
 ## Boot from FLASH / RAM
 
-You will need the BOOT jumpers both set to 0 to run this program in the default boot-from-FLASH configuration. To run the program in SRAM, you can modify the memory regions in `ldscript.ld` as follows:
+To run the program in SRAM, you can modify the memory regions in `ldscript.ld` as follows:
 
 ```
 #define VEC_SPACE  SRAM
@@ -44,12 +44,12 @@ You will need the BOOT jumpers both set to 0 to run this program in the default 
 #define LOAD_SPACE SRAM
 ```
 
-and set both BOOT jumpers to 1.
+Booting this device from SRAM is a little awkward -- you will need to pull B2
+high and press the BOOT0 button every time the device resets.
 
 
 ## Hardware references
 
-* [STM32F103C8 datasheet](https://www.st.com/resource/en/datasheet/stm32f103c8.pdf)
-* [RM0008: STM32F1 reference manual](https://www.st.com/resource/en/reference_manual/cd00171190.pdf)
-* [PM0056: Cortex-M3 programming manual](https://www.st.com/resource/en/programming_manual/cd00228163.pdf)
-* [PM0075: STM32F1 flash programming manual](https://www.st.com/resource/en/programming_manual/cd00283419.pdf)
+* [STM32F401CC datasheet](https://www.st.com/resource/en/datasheet/stm32f401cc.pdf)
+* [RM0368: STM32F4 reference manual](https://www.st.com/resource/en/reference_manual/dm00096844.pdf)
+* [PM0214: Cortex-M4 programming manual](https://www.st.com/resource/en/programming_manual/dm00046982.pdf)

@@ -1,10 +1,10 @@
 MEMORY
 {
-    FLASH (rx)          : ORIGIN = 0x08000000, LENGTH = 64K
-    SRAM (rwx)          : ORIGIN = 0x20000000, LENGTH = 20K
+    FLASH (rx)          : ORIGIN = 0x08000000, LENGTH = 256K
+    SRAM (rwx)          : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
-#define VEC_SPACE   FLASH 
+#define VEC_SPACE   FLASH
 #define CODE_SPACE  FLASH
 #define LOAD_SPACE  FLASH
 #define WORK_SPACE  SRAM
