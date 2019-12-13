@@ -7,13 +7,9 @@ CXX = $(TOOL_PREFIX)g++
 CPP = $(TOOL_PREFIX)cpp
 LD = $(TOOL_PREFIX)ld
 
-MCU = stm32f103c8
-VECTORTYPE = stm32f1
-DEFINES += -DSTM32F103
-DEFINES += -DCORE_CM3
-
-# Enabling semihosting requires a debugger to be attached at all times
-USE_SEMIHOSTING = 1
+# Enabling semihosting allows you to use printf() et al without a serial
+# adapter, but requires a debugger to be attached at all times.
+USE_SEMIHOSTING = 0
 
 ##############################################################################
 
@@ -32,6 +28,8 @@ CXXFLAGS = $(CFLAGS)
 
 LDSCRIPT = ldscript.ld
 LDFLAGS += $(CPUFLAGS)
+
+VECTORTYPE = stm32f1
 
 LDFLAGS += --specs=nano.specs
 

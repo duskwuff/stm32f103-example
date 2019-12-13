@@ -43,10 +43,11 @@ if (exists $set{bootram}) {
 }
 
 print <<EOF;
+/* This file was generated from $ARGV by mkvectors.pl */
+
 .syntax unified
 .arch armv7-m
-.cpu cortex-m3
-.fpu softvfp
+.cpu cortex-m0
 .thumb
 
 .section .text.Default_Handler
