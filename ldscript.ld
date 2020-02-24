@@ -4,20 +4,22 @@ MEMORY
     SRAM (rwx)          : ORIGIN = 0x20000000, LENGTH = 20K
 }
 
-#define VEC_SPACE   FLASH 
-#define CODE_SPACE  FLASH
-#define LOAD_SPACE  FLASH
-#define WORK_SPACE  SRAM
-#define STACK_SPACE SRAM
-
-__stack = ORIGIN(STACK_SPACE) + LENGTH(STACK_SPACE);
-_Min_Heap_Size = 0;         /* required amount of heap  */
-_Min_Stack_Size = 0x400;    /* required amount of stack */
+/*
+ * These defines control what memory spaces should be used for each section.
+ *
+ * To boot from SRAM on STM32F1, set all memory spaces to SRAM.
+ */
+#define VECTOR_SPACE    FLASH
+#define CODE_SPACE      FLASH
+#define RODATA_SPACE    FLASH
+#define DATA_SPACE      SRAM
+#define STACK_SPACE     SRAM
 
 /* Special symbols and aliases */
-_sidata = LOADADDR(.data); /* used by startup */
-__bss_start__ = _sbss; /* required by crt0 */
-__bss_end__ = _ebss;   /* required by crt0 */
+_sidata = LOADADDR(.data);  /* used by startup */
+__bss_start__ = _sbss;      /* required by crt0 */
+__bss_end__ = _ebss;        /* required by crt0 */
+__stack = ORIGIN(STACK_SPACE) + LENGTH(STACK_SPACE);
 
 /* Define output sections */
 SECTIONS
@@ -27,7 +29,7 @@ SECTIONS
         . = ALIGN(4);
         KEEP(*(.isr_vector))
         . = ALIGN(4);
-    } >CODE_SPACE
+    } >VECTOR_SPACE
 
     . = ALIGN(4);
 
@@ -48,7 +50,7 @@ SECTIONS
         *(.rodata)
         *(.rodata*)
         . = ALIGN(4);
-    } >CODE_SPACE
+    } >RODATA_SPACE
 
     .ARM.extab : {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -87,7 +89,7 @@ SECTIONS
         *(.data*)
         . = ALIGN(4);
         _edata = .;
-    } >WORK_SPACE AT>LOAD_SPACE
+    } >DATA_SPACE AT>RODATA_SPACE
 
     . = ALIGN(4);
     .bss : {
@@ -97,18 +99,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         _ebss = .;
-    } >WORK_SPACE
-
-    /* User_heap_stack section, used to check that there is enough RAM left */
-    ._user_heap_stack : {
-        . = ALIGN(8);
-        PROVIDE ( end = . );
-        PROVIDE ( _end = . );
-        PROVIDE ( __end__ = . );
-        . = . + _Min_Heap_Size;
-        . = . + _Min_Stack_Size;
-        . = ALIGN(8);
-    } >WORK_SPACE
+    } >DATA_SPACE
 
     /* Remove information from the standard libraries */
     /DISCARD/ : {

@@ -1,5 +1,4 @@
 .syntax unified
-.cpu cortex-m3
 .thumb
 
 .global Default_Handler
@@ -11,11 +10,13 @@ Reset_Handler:
     ldr     r1, =_sidata
     ldr     r2, =_sdata
     ldr     r3, =_edata
+    b       .L_init_data_enter
+
 .L_init_data:
+    ldmia   r1!, {r0}
+    stmia   r2!, {r0}
+.L_init_data_enter:
     cmp     r2, r3
-    ittt    lt
-    ldrlt   r0, [r1], #4
-    strlt   r0, [r2], #4
     blt     .L_init_data
 
     bl      SystemInit
