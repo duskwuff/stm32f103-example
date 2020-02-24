@@ -1,6 +1,5 @@
 TOOL_PREFIX = arm-none-eabi-
 
-AR = $(TOOL_PREFIX)ar
 AS = $(TOOL_PREFIX)as
 CC = $(TOOL_PREFIX)gcc
 CXX = $(TOOL_PREFIX)g++
@@ -13,23 +12,23 @@ USE_SEMIHOSTING = 0
 
 ##############################################################################
 
-CPUFLAGS += -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -mfpu=vfp
-FLAGS += -ISTM32CubeF1/Drivers/CMSIS/Core/Include
-FLAGS += -ISTM32CubeF1/Drivers/CMSIS/Device/ST/STM32F1xx/Include
+CPUFLAGS += -mcpu=cortex-m3 -mfpu=vfp
 
-FLAGS += $(CPUFLAGS) $(DEFINES)
-FLAGS += -Wall -Werror
-FLAGS += -Os
-FLAGS += -g3 -gz -fno-eliminate-unused-debug-types
-FLAGS += -ffunction-sections -fdata-sections
+CPPFLAGS += -ISTM32CubeF1/Drivers/CMSIS/Core/Include
+CPPFLAGS += -ISTM32CubeF1/Drivers/CMSIS/Device/ST/STM32F1xx/Include
 
-CFLAGS += $(FLAGS) -std=gnu99
-CXXFLAGS = $(CFLAGS)
+CFLAGS = $(CPUFLAGS) $(CPPFLAGS)
+ASFLAGS = $(CPUFLAGS) $(CPPFLAGS)
+
+CFLAGS += -Os
+CFLAGS += -Wall -Werror
+CFLAGS += -g3 -gz -fno-eliminate-unused-debug-types
+CFLAGS += -ffunction-sections -fdata-sections
 
 LDSCRIPT = ldscript.ld
 LDFLAGS += $(CPUFLAGS)
-
-VECTORTYPE = stm32f1
+LDFLAGS += -Wl,-compress-debug-sections=zlib -Wl,-nmagic
+LDFLAGS += -Wl,-gc-sections
 
 LDFLAGS += --specs=nano.specs
 
@@ -41,28 +40,38 @@ endif
 
 ##############################################################################
 
-%.a: $(OBJECTS)
-	$(AR) cru $@ $+
-
 BINARY = program.elf
 
 OBJECTS += main.o
-OBJECTS += startup.o vectors.o
+OBJECTS += startup.o
+OBJECTS += vectors-stm32f1.o
 
-GENERATED = $(LDSCRIPT).gen vectors.s
+GENERATED = $(LDSCRIPT).gen
 
 ##############################################################################
 
 default: $(BINARY)
 
+$(BINARY): $(OBJECTS) $(LDSCRIPT).gen
+	$(CC) $(LDFLAGS) -T $(LDSCRIPT).gen $(OBJECTS) -o $@
+
 $(LDSCRIPT).gen: $(LDSCRIPT) Makefile
 	$(CPP) -P $(LDSCRIPT) -o $(LDSCRIPT).gen
 
-vectors.s: $(VECTORTYPE).vec mkvectors.pl
-	perl mkvectors.pl $< > $@
+%.o: %.s
+	$(AS) --MD $*.d $(ASFLAGS) $< -o $@
 
-$(BINARY): $(OBJECTS) $(LDSCRIPT).gen
-	$(CXX) $(LDFLAGS) -T $(LDSCRIPT).gen $(OBJECTS) -o $@
+%.o: %.c
+	$(CC) -MMD -c $(CFLAGS) $< -o $@
+
+%.o: %.cpp
+	$(CXX) -MMD -c $(CFLAGS) $< -o $@
+
+-include $(OBJECTS:.o=.d)
 
 clean:
-	rm -f $(BINARY) $(OBJECTS) $(GENERATED)
+	rm -f $(BINARY) $(OBJECTS) $(GENERATED) $(OBJECTS:.o=.d)
+
+.PHONY: default clean
+
+.SUFFIXES: # disable all built-in suffix rules
