@@ -1,20 +1,3 @@
-MEMORY
-{
-    FLASH (rx)          : ORIGIN = 0x08000000, LENGTH = 64K
-    SRAM (rwx)          : ORIGIN = 0x20000000, LENGTH = 20K
-}
-
-/*
- * These defines control what memory spaces should be used for each section.
- *
- * To boot from SRAM on STM32F1, set all memory spaces to SRAM.
- */
-#define VECTOR_SPACE    FLASH
-#define CODE_SPACE      FLASH
-#define RODATA_SPACE    FLASH
-#define DATA_SPACE      SRAM
-#define STACK_SPACE     SRAM
-
 /* Special symbols and aliases */
 _sidata = LOADADDR(.data);  /* used by startup */
 __bss_start__ = _sbss;      /* required by crt0 */

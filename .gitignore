@@ -7,5 +7,4 @@
 *.elf
 
 # Generated files
-vectors.s
-ldscript.ld.gen
+*.ld.gen

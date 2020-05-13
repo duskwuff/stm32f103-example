@@ -20,6 +20,10 @@ __isr_vector_BootRAM:
     ldr pc, [pc, -\loc]
 .endm
 
+.macro END_VECTORS
+.size __isr_vector, .-__isr_vector
+.endm
+
 .section .isr_vector, "a", %progbits
 .align
 .global __isr_vector

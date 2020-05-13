@@ -1,42 +1,27 @@
-#include <stm32f103xb.h>
-#include <stdint.h>
-#include "macros.h"
+#include "common.h"
+#include "systick.h"
 
 extern void * __isr_vector[];
 
-volatile uint32_t tick_counter = 0;
-
-void SysTick_Handler(void)
-{
-    tick_counter++;
-}
-
-void delay_ms(int ticks)
-{
-    uint32_t start_tick = tick_counter;
-    while (tick_counter - start_tick < ticks) {
-        __WFI();
-    }
-}
-
 void SystemInit(void)
 {
-    // Relocate vector table -- required to run from RAM
+    // Relocate vector table -- this should generally be set by the MCU but
+    // may be incorrect if running from a bootloader
     SCB->VTOR = (intptr_t) __isr_vector;
 
-    // Configure for SYSCLK = 72 MHz (HSE = 8 MHz x 9)
-    uint32_t cfgr = 0;
-    SET_FIELD(cfgr, RCC_CFGR_SW,        0b00);      // stay on HSI
-    SET_FIELD(cfgr, RCC_CFGR_HPRE,      0b0000);    // no AHB divider
-    SET_FIELD(cfgr, RCC_CFGR_PPRE1,     0b100);     // APB1 = HCLK/2 (36 MHz)
-    SET_FIELD(cfgr, RCC_CFGR_PPRE2,     0b000);     // APB2 = HCLK/1 (72 MHz)
-    SET_FIELD(cfgr, RCC_CFGR_ADCPRE,    0b00);      // ADC = PCLK2/2
-    SET_FIELD(cfgr, RCC_CFGR_PLLSRC,    0b1);       // PLLSRC = HSE
-    SET_FIELD(cfgr, RCC_CFGR_PLLXTPRE,  0b0);       // no HSE divider
-    SET_FIELD(cfgr, RCC_CFGR_PLLMULL,   9-1);       // PLLM = 9
-    SET_FIELD(cfgr, RCC_CFGR_USBPRE,    0b1);       // USB = PLL/1.5 (48 MHz)
-    SET_FIELD(cfgr, RCC_CFGR_MCO,       0b000);     // no MCO
-    RCC->CFGR = cfgr;
+    // Configure for SYSCLK = 72 MHz (HSE = 8 MHz)
+    RCC->CFGR = 0
+        | FIELD_VAL(RCC_CFGR_SW,        0b00)       // stay on HSI for now
+        | FIELD_VAL(RCC_CFGR_HPRE,      0b0000)     // no AHB divider
+        | FIELD_VAL(RCC_CFGR_PPRE1,     0b100)      // APB1 = HCLK/2 (36 MHz)
+        | FIELD_VAL(RCC_CFGR_PPRE2,     0b000)      // APB2 = HCLK/1 (72 MHz)
+        | FIELD_VAL(RCC_CFGR_ADCPRE,    0b00)       // ADC = PCLK2/2
+        | FIELD_VAL(RCC_CFGR_PLLSRC,    0b1)        // PLLSRC = HSE
+        | FIELD_VAL(RCC_CFGR_PLLXTPRE,  0b0)        // no HSE divider
+        | FIELD_VAL(RCC_CFGR_PLLMULL,   9-1)        // PLLM = 9
+        | FIELD_VAL(RCC_CFGR_USBPRE,    0b1)        // USB = PLL/1.5 (48 MHz)
+        | FIELD_VAL(RCC_CFGR_MCO,       0b000)      // no MCO
+        ;
 
     // Turn on HSE
     SET_FIELD(RCC->CR, RCC_CR_HSEON, 1);
@@ -47,17 +32,17 @@ void SystemInit(void)
     SPIN_UNTIL(GET_FIELD(RCC->CR, RCC_CR_PLLRDY));
 
     // Enable FLASH wait states
-    uint32_t acr = 0;
-    SET_FIELD(acr,  FLASH_ACR_LATENCY,  2); // two wait states
-    SET_FIELD(acr,  FLASH_ACR_PRFTBE,   1); // enable prefetch
-    FLASH->ACR = acr;
+    FLASH->ACR = 0
+        | FIELD_VAL(FLASH_ACR_LATENCY,  2)  // two wait states
+        | FIELD_VAL(FLASH_ACR_PRFTBE,   1)  // enable prefetch
+        ;
 
     // Switch to PLL
-    SET_FIELD(RCC->CFGR, RCC_CFGR_SW, 0b10); // PLL
-    SPIN_UNTIL(GET_FIELD(RCC->CFGR, RCC_CFGR_SWS) == 0b10);
+    SET_FIELD_SHIFTED(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    SPIN_UNTIL((RCC->CFGR & RCC_CFGR_SWS) == RCC_CFGR_SWS_PLL);
 
     // Configure SysTick to tick once every millisecond
-    SysTick_Config(72*1000*1000 / 1000);
+    SysTick_Config(72*1000);
 }
 
 int main(void)
