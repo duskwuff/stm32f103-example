@@ -79,6 +79,6 @@
 
 
 /**
- * `SPIN_WHILE()` spin-loops until a condition is true.
+ * `SPIN_UNTIL()` spin-loops until a condition is true.
  */
 #define SPIN_UNTIL(cond) do { } while((cond) == 0)
