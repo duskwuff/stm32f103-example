@@ -1,4 +1,4 @@
-.include "vectors-common.s"
+.include "vectors-arm.s"
 
 VECTOR  0,  WWDG
 VECTOR  1,  PVD

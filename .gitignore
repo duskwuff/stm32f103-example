@@ -1,10 +1,14 @@
-# Prerequisites
-*.d
-
 # Object files
-*.o
-*.a
 *.elf
 
-# Generated files
-*.ld.gen
+# Generated / local files
+/.cache
+/CMakeCache.txt
+/CMakeFiles/
+/Makefile
+/cmake_install.cmake
+/compile_commands.json
+
+# Local configuration
+/.clangd
+/.ctags

@@ -2,6 +2,8 @@
 _sidata = LOADADDR(.data);  /* used by startup */
 __bss_start__ = _sbss;      /* required by crt0 */
 __bss_end__ = _ebss;        /* required by crt0 */
+end = _end;                 /* required by rdimon */
+__end__ = _end;             /* ditto */
 __stack = ORIGIN(STACK_SPACE) + LENGTH(STACK_SPACE);
 
 /* Define output sections */
@@ -83,6 +85,8 @@ SECTIONS
         . = ALIGN(4);
         _ebss = .;
     } >DATA_SPACE
+
+    _end = NEXT(4);
 
     /* Remove information from the standard libraries */
     /DISCARD/ : {
