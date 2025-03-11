@@ -1,14 +1,2 @@
-# Object files
-*.elf
-
-# Generated / local files
+/build/
 /.cache
-/CMakeCache.txt
-/CMakeFiles/
-/Makefile
-/cmake_install.cmake
-/compile_commands.json
-
-# Local configuration
-/.clangd
-/.ctags

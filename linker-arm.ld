@@ -10,9 +10,10 @@ __stack = ORIGIN(STACK_SPACE) + LENGTH(STACK_SPACE);
 SECTIONS
 {
     /* Vector table -- must be at the top of memory */
-    .isr_vector : {
-        . = ALIGN(4);
-        KEEP(*(.isr_vector))
+    .vectors : {
+        . = ALIGN(256);
+        KEEP(*(.vectors))
+        ASSERT(. - ADDR(.vectors) > 8, "Vector table appears to be empty");
         . = ALIGN(4);
     } >VECTOR_SPACE
 
@@ -46,6 +47,22 @@ SECTIONS
         *(.ARM.exidx*)
         __exidx_end = .;
     } >CODE_SPACE
+
+    .copy_table : {
+        . = ALIGN(4);
+        __copy_table_start__ = .;
+        LONG(LOADADDR(.data))
+        LONG(ADDR(.data))
+        LONG(SIZEOF(.data)/4)
+        __copy_table_end__ = .;
+    } >RODATA_SPACE
+
+    .zero_table : {
+        . = ALIGN(4);
+        __zero_table_start__ = .;
+        /* currently unused */
+        __zero_table_end__ = .;
+    } >RODATA_SPACE
 
     .preinit_array : {
         PROVIDE_HIDDEN (__preinit_array_start = .);
@@ -87,15 +104,4 @@ SECTIONS
     } >DATA_SPACE
 
     _end = NEXT(4);
-
-    /* Remove information from the standard libraries */
-    /DISCARD/ : {
-        libc.a ( * )
-        libm.a ( * )
-        libgcc.a ( * )
-    }
-
-    .ARM.attributes 0 : {
-        *(.ARM.attributes)
-    }
 }

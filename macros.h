@@ -1,7 +1,7 @@
 #pragma once
 #include <assert.h>
 
-/*
+/**
  * This returns a constant expression while determining if an argument is
  * a constant expression, most importantly without evaluating the argument.
  * Glory to Martin Uecker <Martin.Uecker@med.uni-goettingen.de>

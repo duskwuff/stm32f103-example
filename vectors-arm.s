@@ -24,7 +24,7 @@ __isr_vector_BootRAM:
 .size __isr_vector, .-__isr_vector
 .endm
 
-.section .isr_vector, "a", %progbits
+.section .vectors, "a", %progbits
 .align
 .global __isr_vector
 .type __isr_vector, %object

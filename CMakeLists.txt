@@ -16,32 +16,38 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-project(program LANGUAGES C CXX ASM)
+project(program.elf LANGUAGES C CXX ASM)
 
-add_executable(program.elf
+set(CPUFLAGS -mcpu=cortex-m3 -mfloat-abi=soft)
+set(LINKER_SCRIPT linker-stm32f103c8.ld)
+
+add_executable(${PROJECT_NAME}
     main.c
+    startup.c
     systick.c
 
-    startup.s
     vectors-stm32f103-md.s
 )
 
-target_include_directories(program.elf PUBLIC
-    vendor/CMSIS_5/CMSIS/Core/Include
+target_include_directories(${PROJECT_NAME} PUBLIC
+    .
+    vendor/CMSIS_6/CMSIS/Core/Include
     vendor/cmsis_device_f1/Include
 )
 
-target_link_directories(program.elf PUBLIC
+target_link_directories(${PROJECT_NAME} PUBLIC
     .
 )
 
-set(CPUFLAGS -mcpu=cortex-m3 -mfloat-abi=soft)
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 17)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${PROJECT_NAME} PROPERTY LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${LINKER_SCRIPT})
 
-set_property(TARGET program.elf PROPERTY C_STANDARD 17)
-set_property(TARGET program.elf PROPERTY CXX_STANDARD 17)
-
-target_compile_options(program.elf PUBLIC
+target_compile_options(${PROJECT_NAME} PUBLIC
     ${CPUFLAGS}
+
+    # Automatically include project.h in all compilation units
+    -include ${CMAKE_CURRENT_SOURCE_DIR}/project.h
 
     # Optimize for debuggability
     -Og
@@ -54,14 +60,18 @@ target_compile_options(program.elf PUBLIC
     -ffunction-sections -fdata-sections
 )
 
-target_link_options(program.elf PUBLIC
+target_link_options(${PROJECT_NAME} PUBLIC
     ${CPUFLAGS}
 
     --specs=nano.specs
-    --specs=rdimon.specs
+    --specs=nosys.specs
 
     -e Reset_Handler
-    LINKER:-T,linker-stm32f103c8.ld
+    LINKER:-T,${LINKER_SCRIPT}
     LINKER:--nmagic
     LINKER:--compress-debug-sections=zlib
+    LINKER:-Map ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map
+
+    # This disables an unnecessary warning: https://github.com/raspberrypi/pico-sdk/issues/1029
+    LINKER:--no-warn-rwx-segments
 )
